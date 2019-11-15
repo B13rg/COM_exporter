@@ -78,4 +78,4 @@ class WorkCommander:
                 self.OutputString = self.OutputString + workItem.Output + "\n"
                 self.QDisplay.task_done()
             except:
-                return
+                pass

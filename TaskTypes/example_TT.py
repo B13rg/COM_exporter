@@ -19,8 +19,12 @@ def Date():
     (output,exitCode) = runCommand(["date"])
     output = "COM_example_date<value='"+output.strip()+"'> "+str(exitCode)
     return output
+def Tree():
+    (output,exitCode) = runCommand(["tree --charset=ascii"])
+    output = "COM_example_date<value='"+output.strip()+"'> "+str(exitCode)
+    return output
 
-FuncList = [Whoami,Pwd,Ddate,Date]
+FuncList = [Whoami,Pwd,Ddate,Date,Tree]
 
 def runCommand(command):
     """
