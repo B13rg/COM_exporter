@@ -4,6 +4,7 @@ from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from Queue import Queue
 import uuid, re
 from subprocess import check_output, CalledProcessError
+import TaskTypes.example_TT as example_TT
 
 # Create 2 queues, worker queue and display queue
 # When a new request is received (from web interface) the work item is added to the queue
@@ -65,11 +66,8 @@ class WorkCommander:
         """
         Fetches work for a given type, creates a WorkItem for each script, and places them in self.QWork
         """
-        self.QWork.put((WorkItem(test1,self.QDisplay)))
-        self.QWork.put((WorkItem(test2,self.QDisplay)))
-        self.QWork.put((WorkItem(test3,self.QDisplay)))
-        self.QWork.put((WorkItem(test4,self.QDisplay)))
-        self.QWork.put((WorkItem(test5,self.QDisplay)))
+        for func in example_TT.FuncList:
+            self.QWork.put((WorkItem(func,self.QDisplay)))
         return
 
     def ProcessCompletedWork(self):
@@ -81,32 +79,3 @@ class WorkCommander:
                 self.QDisplay.task_done()
             except:
                 return
-
-def test1():
-    (output,exitCode) = runCommand(["whoami"])
-    return output
-def test2():
-    (output,exitCode) = runCommand(["pwd"])
-    return output
-def test3():
-    (output,exitCode) = runCommand(["tree"])
-    return output
-def test4():
-    (output,exitCode) = runCommand(["ddate"])
-    return output
-def test5():
-    (output,exitCode) = runCommand(["date"])
-    return output
-
-def runCommand(command):
-    """
-    Returns a tuple of (output text, exit code)
-    """
-    try:
-        output = check_output(command)
-    except CalledProcessError, err: # Hit if error code is anything except 0
-        # Pass error info to calling function for it to handle
-        return (err.output, err.returncode)
-    ansi_escape = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
-    output = ansi_escape.sub('',output)
-    return (output, 0)
