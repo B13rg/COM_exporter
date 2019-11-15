@@ -44,11 +44,11 @@ class WorkCommander:
     A class that takes a given work type that prepares and starts each script
     """
 
-    def __init__(self, workType):
+    def __init__(self, workFuncs):
         self.ID = uuid.uuid4()		# Uniqueue identifier
         self.QWork = Queue()
         self.QDisplay = Queue()
-        self.WorkType = workType
+        self.WorkFuncs = workFuncs
         self.OutputString = ""
         pass
 
@@ -66,7 +66,7 @@ class WorkCommander:
         """
         Fetches work for a given type, creates a WorkItem for each script, and places them in self.QWork
         """
-        for func in example_TT.FuncList:
+        for func in self.WorkFuncs:
             self.QWork.put((WorkItem(func,self.QDisplay)))
         return
 
