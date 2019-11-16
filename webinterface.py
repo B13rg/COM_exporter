@@ -4,6 +4,9 @@ from SocketServer import ThreadingMixIn
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 import threading
 
+import TaskTypes.puppet as puppet
+import TaskTypes.example_TT as example_TT
+
 NUMWORKERS = 2  # Number of workers to create
 ADDR = '127.0.0.1'
 PORT = 9980  # Port to run the web interface on
@@ -23,9 +26,9 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         print("recieved request")
         listFuncs = None
-        if self.path in TaskTypes:
-            # Get list of funcs
-            pass
+        exporter = self.path.replace('/','').lower()
+        if exporter in TaskTypes:
+            listFuncs = TaskTypes[exporter]
         else:
             listFuncs = TaskTypes["example_TT"]
         message = COM.WorkCommander(listFuncs).run()
@@ -38,17 +41,17 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 
 
-
 if __name__ == '__main__':
     listWorkers = []
     for i in range(NUMWORKERS):
         thread = worker.threadWorker(COM.listWorkQueues)
         thread.start()
         listWorkers.append(thread)
-    
-    container = __import__("TaskTypes")
-    module = getattr(container,"example_TT")
-    TaskTypes["example_TT"] = getattr(module,"FuncList")
+
+    TaskTypes["example_TT"] = example_TT.FuncList
+
+    TaskTypes["puppet"] = puppet.FuncList
+
 
     server = ThreadedHTTPServer((ADDR, PORT), Handler)
     print 'Starting server on '+ADDR+':'+str(PORT)+' , use <Ctrl-C> to stop'
