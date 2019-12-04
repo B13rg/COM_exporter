@@ -1,44 +1,47 @@
-from subprocess import check_output, CalledProcessError
-import re
+import common as COM
 
-PROMETHEUS_TEMPLATE = "COM_example_${func}<${parameters}> ${exit_code}"
+COM.PROMETHEUS_TEMPLATE = "COM_example<{parameters}> {exit_code}"   # <--- Customize this based on your TaskType name
 
 def Whoami():
-    (output,exitCode) = runCommand(["whoami"])
-    output = "COM_example_whoami<value='"+output.strip()+"'> "+str(exitCode)
-    return output
+    datadict = {}
+    (output,exitCode) = COM.runCommand(["whoami"])
+    datadict["check"] = "Whoami"
+    datadict["user"] = output.strip()
+    return COM.generateOutput(datadict,exitCode)
+
 def Pwd():
-    (output,exitCode) = runCommand(["pwd"])
-    output = "COM_example_pwd<value='"+output.strip()+"'> "+str(exitCode)
-    return output
-def Ddate():
-    (output,exitCode) = runCommand(["ddate"])
-    output = "COM_example_ddate<value='"+output.strip()+"'> "+str(exitCode)
-    return output
-def Date():
-    (output,exitCode) = runCommand(["date"])
-    output = "COM_example_date<value='"+output.strip()+"'> "+str(exitCode)
-    return output
+    datadict = {}
+    (output,exitCode) = COM.runCommand(["pwd"])
+    datadict["check"] = "Pwd"
+    datadict["pwd"] = output.strip()
+    return COM.generateOutput(datadict,exitCode)
+
 def Tree():
-    (output,exitCode) = runCommand(["tree","./","--charset=ascii"])
-    output = "COM_example_date<value='"+output.strip()+"'> "+str(exitCode)
-    return output
+    datadict = {}
+    (output,exitCode) = COM.runCommand(["tree","./","--charset=ascii"])
+    datadict["check"] = "Tree"
+    datadict["data"] = output.strip()
+    return COM.generateOutput(datadict,exitCode)
 
-FuncList = [Whoami,Pwd,Ddate,Date,Tree]
+#
+##
+## Example Function, use it as a template
+##
+#
+def FunctionName():
+    datadict = {}
+    (output, exitCode) = COM.runCommand(["<command>","<param 1>","<param 2>"])  # <--- Notice how each parameter is a comma separated string
+    datadict["check"] = "FunctionName"
+    datadict["label_name1"] = output.strip()
+    datadict["label_name2"] = "Thing to record"
+    # Secondary command example
+    (output2, exitCode2) = COM.runCommand(["<supp. Command>", "<param3>", "<param4>"])
+    datadict["label_name3"] = output2.strip()
+    return COM.generateOutput(datadict,exitCode)
 
-def runCommand(command):
-    """
-    Returns a tuple of (output text, exit code)
-    """
-    try:
-        output = check_output(command)
-    except CalledProcessError, err:  # Hit if error code is anything except 0
-        # Pass error info to calling function for it to handle
-        return (err.output, err.returncode)
-    ansi_escape = re.compile(r'\x1B[@-_][0-?]*[ -/]*[@-~]')
-    output = ansi_escape.sub('', output)
-    return (output, 0)
-
-
-
-
+#
+##
+## Once you create your functions, add the function names here:
+##
+#
+FuncList = [Whoami,Pwd,Tree,FunctionName]
